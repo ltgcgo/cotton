@@ -6,5 +6,5 @@ WORKDIR /root
 COPY ./includes /root/
 RUN sh /root/install.sh
 
-#EXPOSE 8000
+EXPOSE 5000
 CMD ["sh", "run.sh"]
