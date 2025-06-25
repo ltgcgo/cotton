@@ -1,0 +1,41 @@
+name: "Build for registry"
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "build_version"
+      - ".github/workflows/publish.yml"
+    workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+    permissions:
+      #attestations: "write"
+      contents: "read"
+      id-token: "write"
+      packages: "write"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v3"
+      # The registry login section.
+      # This doesn't have to be Docker Hub. Quay and GHCR can also suffice.
+      # You can also log in to multiple registries if you want.
+      - name: "Log in to GitHub Container Registry"
+        uses: "redhat-actions/podman-login@v1"
+        with:
+          registry: "ghcr.io"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Log in to Docker Hub"
+        uses: "redhat-actions/podman-login@v1"
+        with:
+          registry: "docker.io"
+          username: ${{ secrets.DH_USER }}
+          password: ${{ secrets.DH_PASS }}
+      # The building section.
+      - name: "Generate folder structures and build containers"
+        run: "PATH=./:$PATH bash ./shx build"
+      # The pushing section.
